@@ -1,0 +1,130 @@
+npm install axios --save
+npm install express cors mongoose body-parser --save
+
+mkdir backend
+cd backend
+touch server.js
+
+=============
+in server.js
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const path = require('path')
+const app = express();
+require('./database');
+-----
+app.use(bodyParser.json());
+app.use(cors());
+-----
+// API
+const users = require('./api/users');
+app.use('/api/users', users);
+-----
+app.use(express.static(path.join(__dirname, '../build')))
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../build'))
+})
+-----
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+    console.log(`Server started on port ${port}`);
+});
+
+======================
+
+
+mkdir api
+touch api/users.js
+
+
+==================
+in users.js
+
+
+const express = require('express');
+const router = express.Router()
+-----
+const User = require('../models/User');
+-----
+router.get('/', (req, res) => {
+    User.find()
+        .then(users => res.json(users))
+        .catch(err => console.log(err))
+})
+-----
+router.post('/', (req, res) => {
+    const { name, email } = req.body;
+    const newUser = new User({
+        name: name, email: email
+    })
+    newUser.save()
+        .then(() => res.json({
+            message: "Created account successfully"
+        }))
+        .catch(err => res.status(400).json({
+            "error": err,
+            "message": "Error creating account"
+        }))
+})
+module.exports = router 
+
+===================
+
+mkdir models
+touch models/user.js
+
+================
+
+in user.js:
+
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const userSchema = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    }
+})
+module.exports = mongoose.model("User", userSchema, "users")
+
+=============
+
+edit package.json
+
+
+
+cd in your app folder
+
+in terminal  heroku login
+
+then 
+
+heroku Create
+
+
+
+================
+GIT
+===================
+
+git init
+
+git add .
+
+git commit -m "first"
+
+//paste these two to the terminal
+git remote add origin https://github.com/88dennis/sarms-blog.git
+git push -u origin master
+
+
+    "scripts": {
+        "start": "npx nodemon --exec npx babel-node src/server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
